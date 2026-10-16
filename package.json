@@ -1,0 +1,15 @@
+{
+  "name": "sinesarili",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "concurrently -k -n web,api -c magenta,cyan \"npm run dev --workspace @sinesarili/web\" \"npm run dev --workspace @sinesarili/api\"",
+    "dev:web": "npm run dev --workspace @sinesarili/web",
+    "dev:api": "npm run dev --workspace @sinesarili/api",
+    "build": "npm run build --workspace @sinesarili/web && npm run build --workspace @sinesarili/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

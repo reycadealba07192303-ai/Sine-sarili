@@ -1,0 +1,35 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
+import { createAxinomToken } from "../src/services/axinom.js";
+import { buildDrmConfig, licenseHeaders, licenseUpstream } from "../src/services/drm.js";
+
+test("Axinom tokens bind the saved KID and expire; secrets remain server-side", () => {
+  process.env.DRM_PROVIDER = "axinom";
+  process.env.DRM_ENABLED = "true";
+  process.env.AXINOM_COMMUNICATION_KEY_ID = "11111111-1111-4111-8111-111111111111";
+  process.env.AXINOM_COMMUNICATION_KEY = Buffer.alloc(32, 7).toString("base64");
+  for (const system of ["WIDEVINE", "PLAYREADY", "FAIRPLAY"]) process.env[`AXINOM_${system}_LICENSE_URL`] = `https://tenant.example/${system.toLowerCase()}/AcquireLicense`;
+  process.env.DRM_FAIRPLAY_CERTIFICATE_URL = "https://tenant.example/cert.der";
+  const kid = "22222222-2222-4222-8222-222222222222";
+  const now = Date.parse("2026-01-01T00:00:00Z");
+  const token = createAxinomToken(kid, now);
+  const [header, payload, signature] = token.split(".");
+  assert.equal(JSON.parse(Buffer.from(header, "base64url").toString()).alg, "HS256");
+  const parsed = JSON.parse(Buffer.from(payload, "base64url").toString());
+  assert.equal(parsed.com_key_id, process.env.AXINOM_COMMUNICATION_KEY_ID);
+  assert.equal(Date.parse(parsed.expiration_date), now + 120000);
+  assert.deepEqual(parsed.message.content_keys_source, { inline: [{ id: kid }] });
+  assert.equal(signature, createHmac("sha256", Buffer.alloc(32, 7)).update(`${header}.${payload}`).digest("base64url"));
+  assert.throws(() => createAxinomToken("arbitrary-asset"));
+  assert.equal(licenseUpstream("widevine", kid), "https://tenant.example/widevine/AcquireLicense");
+  const headers = licenseHeaders("widevine", kid);
+  assert.ok(headers["X-AxDRM-Message"]);
+  assert.equal(headers.Authorization, undefined);
+  const config = buildDrmConfig("film", "", {videoUrl:"https://cdn.example/film.mpd",drmHlsUrl:"https://cdn.example/film.m3u8",drmAssetId:kid});
+  assert.ok(config);
+  assert.ok(!JSON.stringify(config).includes("tenant.example"));
+  assert.ok(!JSON.stringify(config).includes(process.env.AXINOM_COMMUNICATION_KEY));
+  process.env.AXINOM_COMMUNICATION_KEY = "invalid";
+  assert.throws(() => createAxinomToken(kid));
+});

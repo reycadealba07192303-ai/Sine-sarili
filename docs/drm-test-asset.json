@@ -1,0 +1,12 @@
+{
+  "title": "BigBuckBunny - DRM test",
+  "dashUrl": "https://e92842bcd48991c44a14abe5.blob.core.windows.net/video-output/8Zk7Vo7s6kxkhTK6sjpo9s/cmaf/manifest.mpd",
+  "hlsUrl": "https://e92842bcd48991c44a14abe5.blob.core.windows.net/video-output/8Zk7Vo7s6kxkhTK6sjpo9s/cmaf/manifest.m3u8",
+  "certificateUrl": "https://tools.axinom.com/FPScert/fairplay.cer",
+  "contentKeyIds": [
+    "f6b2f3e6-3476-4b6a-a781-28183a23af89",
+    "ddd46f09-cc72-4d1b-938c-8b8bb702879c",
+    "d13222ce-a56c-4f88-8705-7ed9d75d49a4"
+  ],
+  "note": "Public test asset metadata only. Manifest contains three KIDs; current single-KID adapter needs multi-key support before this asset can play completely. Not yet attached to a catalog film."
+}

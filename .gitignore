@@ -1,0 +1,26 @@
+node_modules/
+.next/
+out/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.npm-cache/
+apps/web/.npm-cache/
+apps/web/.vercel/
+apps/api/.vercel/
+apps/api/uploads/
+npm-debug.log*
+.ui-check/
+
+# Local-only data and binaries
+apps/api/private-masters/
+apps/api/bin/
+*.tsbuildinfo
+.qodo/
+.claude/
+
+# Loose design reference images at the repo root (production copies live in apps/web/public)
+/*.png
+/*.jpg

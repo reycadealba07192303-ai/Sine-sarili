@@ -1,0 +1,117 @@
+.detail-page.cinema-detail { padding: 95px max(6.5%, calc((100% - 1220px)/2)) 85px; background: #090a0e; min-height: 720px; }
+.cinema-detail .detail-art { height: 100%; opacity: .85; background: #11151d; }
+.cinema-detail .detail-art::after { background: linear-gradient(90deg, #090a0ef5 5%, #090a0ec9 42%, #090a0e33), linear-gradient(0deg, #090a0e 0%, transparent 80%); }
+.cinema-detail .detail-copy { padding-top: 15px; max-width: min(740px, calc(100% - 300px)); }
+.cinema-detail .detail-copy h1 { font-size: clamp(46px, 5.8vw, 84px); font-weight: 900; line-height: 1.02; letter-spacing: -.055em; margin: 23px 0; }
+.cinema-detail .detail-copy .eyebrow { color: #bbc5dc; font-size: 10px; letter-spacing: .19em; }
+.cinema-detail .detail-facts { color: #b6bfd0; font-size: 12px; line-height: 1.8; }
+.cinema-detail .detail-facts .rating-star { color: #e0e6f3; }
+.cinema-detail .detail-genres { margin-top: 24px; }
+.cinema-detail .detail-genres span { border: 1px solid #ffffff1a; border-radius: 6px; background: #ffffff08; color: #d2d9e7; padding: 7px 11px; backdrop-filter: blur(12px); }
+.cinema-detail .detail-tagline { margin-top: 26px; color: #d5ddec; font-size: 15px; font-style: italic; }
+.cinema-detail .detail-synopsis { margin-top: 22px; max-width: 600px; color: #b8c0cf; font-size: 15px; line-height: 1.9; }
+.cinema-detail .detail-director { margin-top: 18px; color: #8b96ab; font-size: 12px; }
+.detail-page.cinema-detail .detail-poster { right: max(6.5%, calc((100% - 1220px)/2)); top: 105px; width: 225px; border-radius: 12px; border: 1px solid #ffffff24; box-shadow: 15px 20px 50px #0009, inset 1px 1px 0 #ffffff12; }
+.film-watch-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 17px; margin-top: 32px; }
+.film-watch-button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 49px; padding: 0 25px; border: 1px solid #ffffff55; border-radius: 9px; background: linear-gradient(140deg, #f2f5fc, #b8c4da); color: #12151c; font-size: 13px; font-weight: 800; box-shadow: 6px 6px 17px #0008, inset 1px 1px 0 #fff8; transition: transform .2s, background .2s; }
+.film-watch-button:hover { transform: translateY(-2px); background: #fff; }
+.film-watch-button:active { transform: translateY(1px); box-shadow: inset 3px 3px 8px #69748b66; }
+.film-watch-button:disabled { opacity: .6; cursor: wait; }
+.film-watch-hint { color: #9ca8bd; font-size: 11px; }
+.film-watch-error { color: #f698b7; font-size: 12px; margin-top: 15px; }
+.film-recognition { margin-top: 42px; max-width: 650px; }
+.film-recognition-heading { display: flex; align-items: center; gap: 18px; margin-bottom: 17px; }
+.film-recognition-heading h2 { flex-shrink: 0; margin: 0; color: #c0c8d6; font-size: 12px; font-weight: 750; letter-spacing: .035em; }
+.film-recognition-heading > span { flex: 1; height: 1px; background: linear-gradient(90deg, #ffffff1c, transparent); }
+.film-awards-list { display: grid; gap: 12px; list-style: none; padding: 0; margin: 0; }
+.film-award { position: relative; display: flex; align-items: center; gap: 22px; padding: 23px 25px; border: 1px solid #ca8a0426; border-radius: 12px; background: radial-gradient(ellipse at 0% 20%, #facc150c, transparent 70%), linear-gradient(125deg, #20222bc9, #11141bcc); backdrop-filter: blur(18px); box-shadow: 8px 10px 24px #0004, inset 0 1px 0 #ffffff06; }
+.film-award-emblem { display: grid; place-items: center; flex: 0 0 66px; width: 66px; height: 72px; color: #eab308; }
+.film-award-emblem svg { display: block; width: 64px; height: 64px; }
+.film-award-copy { min-width: 0; border-left: 1px solid #e7cb5829; padding-left: 22px; }
+.film-award-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+.film-award-badge { color: #f2da7a; font-size: 9px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+.film-award-year { border: 1px solid #ffffff14; border-radius: 4px; padding: 2px 7px; color: #a7aebd; font-size: 10px; line-height: 1.4; }
+.film-award h3 { margin: 0; color: #eff1f7; font-size: 18px; font-weight: 800; line-height: 1.35; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.film-award-copy > p { margin: 7px 0 0; color: #9ba5b7; font-size: 12px; line-height: 1.6; }
+.film-award-category { display: block; margin-top: 7px; color: #8b96ab; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.film-screening-dialog { width: min(1050px, calc(100% - 32px)); height: min(780px, calc(100dvh - 32px), calc(56.25vw + 180px)); max-height: calc(100dvh - 32px); margin: auto; padding: 0; overflow: hidden; border: 1px solid #ffffff26; border-radius: 17px; color: #f4f6fb; background: linear-gradient(135deg, #242a37f0, #10131bf7); backdrop-filter: blur(26px); box-shadow: 0 30px 120px #000c, inset 1px 1px 0 #ffffff14; }
+.film-screening-dialog[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.film-screening-dialog::backdrop { background: #03050bce; backdrop-filter: blur(12px); }
+.film-screening-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 25px; }
+.film-screening-heading p { margin: 0 0 6px; color: #98a7c2; font-size: 9px; font-weight: 750; letter-spacing: .18em; }
+.film-screening-heading > div { min-width: 0; }
+.film-screening-heading h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.03em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.film-screening-heading > button { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border: 1px solid #ffffff1c; border-radius: 50%; background: #222835; box-shadow: 3px 3px 8px #0006, inset 1px 1px 0 #ffffff10; }
+.film-screening-player { min-height: 0; overflow: hidden; background: #000; }
+.film-screening-player video { object-fit: contain; }
+.film-screening-empty { height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 12px; padding: 20px; background: #0c0f16; }
+.film-screening-empty svg { color: #9facc3; }
+.film-screening-empty h3 { margin: 0; font-size: 23px; font-weight: 800; }
+.film-screening-empty p { margin: 0; color: #9faac0; font-size: 13px; }
+.film-screening-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 22px 25px; }
+.film-screening-footer strong { font-size: 14px; }
+.film-screening-footer p { margin: 5px 0 0; color: #99a5bb; font-size: 12px; }
+.film-screening-footer a { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 13px 18px; border-radius: 8px; color: #11151e; background: #dce4f3; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.series-episodes { margin-top: 44px; }
+.series-episodes-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding-bottom: 16px; border-bottom: 1px solid #ffffff14; }
+.series-episodes-heading h2 { margin: 0; color: #f4f5f8; font-size: 24px; font-weight: 850; letter-spacing: -.03em; }
+.series-episodes-heading p { margin: 6px 0 0; color: #8d97aa; font-size: 12px; }
+.series-season-select select { min-width: 140px; padding: 10px 34px 10px 14px; border: 1px solid #ffffff26; border-radius: 8px; color: #f2f2f5; background: #16171d; font-size: 13px; font-weight: 700; cursor: pointer; }
+.series-season-select select:focus-visible { outline: 2px solid #818cf8; outline-offset: 2px; }
+.series-season-label { color: #c9ceda; font-size: 13px; font-weight: 700; }
+.series-episode-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.series-episode { display: grid; grid-template-columns: 34px 168px minmax(0, 1fr); align-items: center; gap: 18px; width: 100%; padding: 16px 12px; border: 0; border-bottom: 1px solid #ffffff0d; border-radius: 10px; color: inherit; background: transparent; text-align: left; cursor: pointer; transition: background .2s; }
+.series-episode:hover:not(:disabled) { background: #ffffff09; }
+.series-episode:disabled { cursor: default; opacity: .6; }
+.series-episode:focus-visible { outline: 2px solid #818cf8; outline-offset: -2px; }
+.series-episode-number { color: #8f99ac; font-size: 22px; font-weight: 300; text-align: center; }
+.series-episode-thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; border-radius: 6px; background: linear-gradient(135deg, #20232d, #14161c); }
+.series-episode-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.series-episode-play { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; background: #0006; opacity: 0; transition: opacity .2s; }
+.series-episode:hover:not(:disabled) .series-episode-play, .series-episode:focus-visible .series-episode-play { opacity: 1; }
+.series-episode-copy { display: grid; gap: 7px; min-width: 0; }
+.series-episode-title { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.series-episode-title strong { overflow: hidden; color: #f1f3f8; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.series-episode-title > span { flex-shrink: 0; color: #a2abbd; font-size: 12px; }
+.series-episode-title .series-soon { padding: 3px 8px; border: 1px solid #ffffff22; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.series-episode-synopsis { color: #8e98aa; font-size: 12px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.series-next { display: inline-flex; align-items: center; gap: 9px; padding: 13px 18px; border: 0; border-radius: 8px; color: #11151e; background: #dce4f3; font-size: 12px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.series-next:hover { background: #fff; }
+@media (max-width: 800px) {
+  .cinema-detail .detail-copy { max-width: calc(100% - 190px); }
+  .detail-page.cinema-detail .detail-poster { width: 155px; }
+  .cinema-detail .detail-synopsis { font-size: 14px; }
+}
+@media (max-width: 520px) {
+  .film-award { gap: 14px; padding: 19px 16px; }
+  .film-award-emblem { flex-basis: 45px; width: 45px; height: 55px; }
+  .film-award-emblem svg { width: 45px; height: 45px; }
+  .film-award-copy { padding-left: 14px; }
+  .film-award h3 { font-size: 16px; }
+  .film-screening-dialog { height: min(calc(100dvh - 32px), calc(56.25vw + 240px)); }
+  .detail-page.cinema-detail { padding: 215px 5% 60px; min-height: 0; }
+  .cinema-detail .detail-copy { max-width: 100%; padding-top: 0; }
+  .detail-page.cinema-detail .detail-poster { width: 100px; right: 5%; top: 35px; }
+  .cinema-detail .detail-copy h1 { font-size: 48px; }
+  .film-watch-actions { align-items: flex-start; flex-direction: column; }
+  .film-watch-button { width: 100%; }
+  .film-screening-heading, .film-screening-footer { padding: 17px; }
+  .film-screening-heading h2 { font-size: 19px; }
+  .film-screening-footer { flex-direction: column; align-items: stretch; gap: 18px; }
+  .series-episodes-heading { align-items: flex-start; flex-direction: column; }
+  .series-episode { grid-template-columns: 120px minmax(0, 1fr); gap: 12px; padding: 12px 4px; }
+  .series-episode-number { display: none; }
+  .series-next { justify-content: center; }
+}
+@media (max-height: 500px) {
+  .film-screening-heading { padding: 10px 16px; }
+  .film-screening-heading h2 { font-size: 18px; }
+  .film-screening-heading p { margin-bottom: 3px; font-size: 8px; }
+  .film-screening-footer { flex-direction: row; align-items: center; padding: 10px 16px; gap: 12px; }
+  .film-screening-footer strong { font-size: 12px; }
+  .film-screening-footer p { font-size: 10px; }
+  .film-screening-footer a { padding: 10px 13px; font-size: 11px; }
+  .film-screening-empty { gap: 6px; padding: 10px; }
+  .film-screening-empty h3 { font-size: 18px; }
+  .film-screening-empty p { font-size: 11px; }
+}

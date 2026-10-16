@@ -1,0 +1,99 @@
+/* ===== Header dropdowns (notifications + profile) ===== */
+.account-popover { border: 0; border-top: 5px solid var(--ss-yellow); border-radius: 0; background: #fff; color: var(--ss-ink); box-shadow: 10px 10px 0 #1c173340; backdrop-filter: none; }
+.account-popover::before { border: 0; background: var(--ss-yellow); }
+.account-popover-title { color: var(--ss-indigo); font: 500 12px/1 var(--ed-label); letter-spacing: .18em; }
+.account-notice-item { border-radius: 0; }
+.account-notice-item:hover, .account-notice-item:focus-visible { background: var(--ss-paper); }
+.account-notice-item:focus-visible { outline-color: var(--ss-indigo); }
+.account-notifications li.is-new .account-notice-dot { background: var(--ss-pink); box-shadow: none; }
+.account-notice-copy strong { color: var(--ss-indigo); font-size: 13px; }
+.account-notice-preview { color: var(--ss-muted); }
+.account-notifications time { color: #8a86a0; }
+.account-notice-back { border: 2px solid var(--ss-indigo); border-radius: 0; color: var(--ss-indigo); font: 600 12px/1 var(--ed-label); letter-spacing: .06em; text-transform: uppercase; }
+.account-notice-back:hover { background: var(--ss-indigo); color: #fff; }
+.account-notice-detail h3 { color: var(--ss-indigo); font: 400 24px/1.05 var(--ed-display); text-transform: uppercase; }
+.account-notice-detail p { color: var(--ss-ink); }
+.account-empty { color: var(--ss-muted); }
+.account-profile-head strong { color: var(--ss-indigo); }
+.account-profile-head span { color: var(--ss-muted); }
+.account-plan { border: 0; border-radius: 0; background: var(--ss-paper); color: var(--ss-muted); font: 600 12px/1.2 var(--ed-label); letter-spacing: .08em; text-transform: uppercase; }
+.account-plan.is-active { background: var(--ss-green); color: #fff; }
+.account-profile-menu a, .account-profile-menu .account-signout { border-radius: 0; color: var(--ss-ink); }
+.account-profile-menu a:hover, .account-profile-menu .account-signout:hover { background: var(--ss-paper); color: var(--ss-indigo); }
+.account-profile-menu svg { color: var(--ss-indigo); }
+.account-profile-menu .account-signout { border-top: 1.5px solid #40328C1f; border-radius: 0; }
+.account-profile-button:hover .account-avatar { box-shadow: 0 0 0 2px #ffffff88; }
+.account-avatar { border-radius: 0; }
+
+/* ===== Account page ===== */
+.account-shell { background: var(--ss-paper); }
+.acct { width: auto; max-width: none; margin: 0; padding: 40px var(--ed-inset, 32px) 80px; color: var(--ss-ink); }
+.acct-kicker { display: flex; align-items: center; gap: 14px; color: var(--ss-indigo); font: 500 12px/1 var(--ed-label); letter-spacing: .18em; text-transform: uppercase; }
+.acct-guest h1 { color: var(--ss-indigo); font: 400 clamp(48px, 6vw, 88px)/.9 var(--ed-display); text-transform: uppercase; }
+.acct-muted { color: var(--ss-muted); font-size: 14px; }
+.acct-strong { color: var(--ss-indigo); font: 400 24px/1.1 var(--ed-display); text-transform: uppercase; }
+
+.acct-hero { gap: 24px; padding: 30px; border: 0; border-radius: 0; background: var(--ss-indigo); color: #fff; box-shadow: 12px 12px 0 var(--ss-yellow); }
+.acct-hero .acct-kicker { color: var(--ss-yellow); }
+.acct-hero .acct-muted { color: #d8d2f1; }
+.acct-avatar { width: 84px; height: 84px; border-radius: 0; background: var(--ss-yellow); color: var(--ss-indigo); font: 400 44px/1 var(--ed-display); }
+.acct-hero h1 { color: #fff; font: 400 clamp(40px, 5vw, 72px)/.92 var(--ed-display); letter-spacing: 0; text-transform: uppercase; }
+.acct-plan-pill { border: 2px solid #ffffff55; border-radius: 0; color: #fff; font: 600 13px/1 var(--ed-label); letter-spacing: .1em; text-transform: uppercase; }
+.acct-plan-pill.is-active { border-color: var(--ss-yellow); background: var(--ss-yellow); color: var(--ss-indigo); }
+
+.acct-card { margin-top: 22px; padding: 26px; border: 0; border-radius: 0; background: #fff; }
+.acct-card h2 { color: var(--ss-indigo); font: 400 30px/1 var(--ed-display); letter-spacing: 0; text-transform: uppercase; }
+.acct-card h2 svg { color: var(--ss-green); }
+.acct-link { color: var(--ss-indigo); font: 600 13px/1 var(--ed-label); letter-spacing: .08em; text-decoration: underline; text-decoration-color: var(--ss-yellow); text-decoration-thickness: 2px; text-underline-offset: 4px; text-transform: uppercase; }
+.acct-link:hover { color: var(--ss-green); }
+.acct-grid { gap: 22px; }
+
+.acct-watch-art { border-radius: 0; background: var(--ss-indigo); }
+.acct-watch-play { background: #40328Caa; }
+.acct-watch-bar { background: #ffffff55; }
+.acct-watch-bar span { background: var(--ss-yellow); }
+.acct-watch strong { color: var(--ss-indigo); font: 400 19px/1.1 var(--ed-display); text-transform: uppercase; }
+.acct-watch small { color: var(--ss-muted); font-size: 12px; }
+.acct-watch .acct-watch-time { color: #8a86a0; }
+.acct-skeleton { border-radius: 0; background: linear-gradient(90deg, #dedbe8, #eceaf2, #dedbe8); background-size: 200% 100%; }
+.acct-empty { border: 2px dashed #40328C40; border-radius: 0; background: var(--ss-paper); }
+.acct-empty p { color: var(--ss-muted); font-size: 14px; }
+
+.acct-card details { border-top: 1.5px solid #40328C1f; }
+.acct-card summary { color: var(--ss-indigo); font: 500 16px/1.2 var(--ed-label); letter-spacing: .06em; text-transform: uppercase; }
+.acct-card details p { color: var(--ss-muted); font-size: 14px; }
+.acct-form label { color: var(--ss-indigo); font: 500 12px/1 var(--ed-label); letter-spacing: .14em; text-transform: uppercase; }
+.acct-form input:not([type="checkbox"]) { height: 48px; border: 2px solid #40328C33; border-radius: 0; background: var(--ss-paper); color: var(--ss-ink); font: 400 15px/1 var(--font-ui, sans-serif); letter-spacing: 0; text-transform: none; }
+.acct-form input:not([type="checkbox"]):focus { border-color: var(--ss-indigo); background: #fff; box-shadow: 5px 5px 0 var(--ss-yellow); }
+.acct-form .acct-check { color: var(--ss-ink); font: 400 14px/1.5 var(--font-ui, sans-serif); letter-spacing: 0; text-transform: none; }
+.acct-check input { accent-color: var(--ss-indigo); }
+.acct-error { border: 0; border-left: 5px solid var(--ss-pink); border-radius: 0; background: #fde8ef; color: #9b1d47; font-size: 13.5px; }
+.acct-notice { border: 0; border-left: 5px solid var(--ss-green); border-radius: 0; background: #e3efe7; color: #23452f; font-size: 13.5px; }
+
+.acct-primary, .acct-secondary, .acct-danger-button, .acct-danger-ghost, .acct-signout { min-height: 48px; padding: 0 20px; border-radius: 0; font: 600 14px/1 var(--ed-label); letter-spacing: .08em; text-transform: uppercase; }
+.acct-primary { border: 0; background: var(--ss-indigo); color: #fff; box-shadow: 6px 6px 0 var(--ss-yellow); }
+.acct-primary:hover:not(:disabled) { background: #33287a; }
+.acct-secondary { border: 2px solid var(--ss-indigo); background: transparent; color: var(--ss-indigo); }
+.acct-secondary:hover { background: var(--ss-indigo); color: #fff; }
+
+.acct-status { border-radius: 0; font: 600 12px/1 var(--ed-label); letter-spacing: .1em; text-transform: uppercase; }
+.acct-status.is-active { background: var(--ss-green); color: #fff; }
+.acct-status.is-waiting { background: var(--ss-yellow); color: var(--ss-indigo); }
+.acct-status.is-review { background: var(--ss-paper); color: var(--ss-muted); }
+.acct-pass .acct-muted strong { color: var(--ss-indigo); }
+.acct-pass-dates div { border: 0; border-radius: 0; background: var(--ss-paper); }
+.acct-pass-dates dt { color: var(--ss-green); font: 500 11px/1 var(--ed-label); letter-spacing: .14em; }
+.acct-pass-dates dd { color: var(--ss-indigo); font: 400 22px/1.1 var(--ed-display); }
+
+.acct-danger { border-top: 6px solid var(--ss-pink); }
+.acct-danger h2 svg { color: var(--ss-pink); }
+.acct-danger-button { border: 0; background: var(--ss-pink); color: #fff; }
+.acct-danger-button:hover:not(:disabled) { background: #c93c69; }
+.acct-danger-ghost { border: 2px solid var(--ss-pink); background: transparent; color: #b4234f; }
+.acct-danger-ghost:hover:not(:disabled) { background: var(--ss-pink); color: #fff; }
+.acct-signout { border: 2px solid var(--ss-indigo); background: transparent; color: var(--ss-indigo); }
+.acct-signout:hover { border-color: var(--ss-indigo); background: var(--ss-indigo); color: #fff; }
+@media (max-width: 760px) {
+  .acct-hero { padding: 22px; box-shadow: 8px 8px 0 var(--ss-yellow); }
+  .acct-avatar { width: 64px; height: 64px; font-size: 34px; }
+}
