@@ -6,6 +6,7 @@
 .studio-sidebar { border-right: 0; background: var(--ss-indigo); color: #fff; }
 .studio-sidebar::-webkit-scrollbar-thumb { background: #ffffff33; }
 .studio-sidebar .admin-brand { border-bottom-color: #ffffff26; }
+.studio-sidebar .brand-titles { flex-direction: column; align-items: flex-start; gap: 6px; }
 .studio-sidebar .brand-name { color: #fff; }
 .studio-sidebar .brand-badge { border: 0; border-radius: 0; background: var(--ss-yellow); color: var(--ss-indigo); font: 600 10px/1 var(--ed-label); letter-spacing: .14em; padding: 4px 6px; }
 .studio-nav-label { color: var(--ss-yellow) !important; font: 500 11px/1 var(--ed-label) !important; letter-spacing: .2em !important; }
