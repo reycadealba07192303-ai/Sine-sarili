@@ -25,8 +25,12 @@ export function licenseUpstream(system: DrmSystem, assetId: string) {
   return httpsUrl(template.replaceAll("{assetId}", encodeURIComponent(assetId)));
 }
 // Videos packaged by SineSarili itself live under /uploads/drm/<keyId>/.
+// ...or, on Vercel, in the public Blob store under drm/<keyId>/.
 export function localDrmUrl(value: string | undefined) {
-  return value && /^\/uploads\/drm\/[a-f0-9-]{36}\/manifest\.mpd$/i.test(value) ? value : null;
+  return value && (/^\/uploads\/drm\/[a-f0-9-]{36}\/manifest\.mpd$/i.test(value) || /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/drm\/[a-f0-9-]{36}\/manifest\.mpd$/i.test(value)) ? value : null;
+}
+export function drmKeyIdFromUrl(value: string) {
+  return /\/drm\/([a-f0-9-]{36})\/manifest\.mpd$/i.exec(value)?.[1] ?? "";
 }
 export function buildDrmConfig(slug: string, episodeId: string, asset: { videoUrl?: string; drmHlsUrl?: string; drmAssetId?: string }, teaser = false) {
   if (usingAxinom() && !uuid(asset.drmAssetId ?? "")) return null;

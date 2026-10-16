@@ -3,7 +3,7 @@ import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
-import { uploadsDirectory } from "../uploads.js";
+import { isPrivateBlobUrl, readStoredFile } from "./storage.js";
 
 export const ReceiptReadingSchema = z.object({
   is_payment_receipt: z.boolean().describe("True only if the image is a transaction receipt or confirmation screen from an e-wallet or bank app"),
@@ -46,15 +46,13 @@ export function isReceiptReaderConfigured() {
 }
 
 export async function receiptImageFromUrl(receiptUrl: string) {
-  const filename = path.basename(receiptUrl);
-  if (!receiptUrl.startsWith("/uploads/") || !filename.startsWith("receipt-")) return null;
+  const filename = path.basename(receiptUrl.split("?")[0]);
+  const local = receiptUrl.startsWith("/uploads/");
+  if (!filename.startsWith("receipt-") || (!local && !(isPrivateBlobUrl(receiptUrl) && receiptUrl.includes("/receipts/")))) return null;
   const mediaType = MEDIA_TYPES[path.extname(filename).toLowerCase()];
   if (!mediaType) return null;
-  try {
-    return { data: await readFile(path.join(uploadsDirectory, filename)), mediaType };
-  } catch {
-    return null;
-  }
+  const stored = await readStoredFile(receiptUrl).catch(() => null);
+  return stored ? { data: stored.data, mediaType } : null;
 }
 
 async function readReceiptWithOpenRouter(image: { data: Buffer; mediaType: string }): Promise<ReceiptReadResult> {

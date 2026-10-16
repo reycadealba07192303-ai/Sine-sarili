@@ -7,6 +7,7 @@ import { resolveVideoSource } from "../video-service.js";
 import mongoose from "mongoose";
 import { currentViewer, getViewerAccessStatus } from "../auth.js";
 import { WatchHistory } from "../models/watch-history.js";
+import { isPrivateBlobUrl } from "../services/storage.js";
 
 export const filmsRouter = Router();
 
@@ -164,7 +165,9 @@ filmsRouter.get("/:slug", async (request, response, next) => {
           .map((episode) => ({
             ...episode,
             isAvailable: Boolean(episode.videoUrl),
-            videoUrl: isAuthenticated ? episode.videoUrl : "",
+            // An uploaded master stays private until it has been encrypted for streaming.
+            isProcessing: isPrivateBlobUrl(episode.videoUrl),
+            videoUrl: isAuthenticated && !isPrivateBlobUrl(episode.videoUrl) ? episode.videoUrl : "",
             drmAssetId: undefined,
             drmHlsUrl: undefined,
             subtitlesUrl: isAuthenticated ? episode.subtitlesUrl : "",
@@ -178,7 +181,8 @@ filmsRouter.get("/:slug", async (request, response, next) => {
         drmAssetId: undefined,
         drmHlsUrl: undefined,
         teaserDrmAssetId: undefined,
-        videoUrl: isAuthenticated ? film.videoUrl : "",
+        isProcessing: isPrivateBlobUrl(film.videoUrl),
+        videoUrl: isAuthenticated && !isPrivateBlobUrl(film.videoUrl) ? film.videoUrl : "",
         subtitlesUrl: isAuthenticated ? film.subtitlesUrl : "",
         isSignedIn,
         isAuthenticated,

@@ -1,5 +1,6 @@
 "use client";
 
+import { shrinkImage } from "@/lib/media-upload";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Check, CheckCircle2, Clock3, Copy, ImageUp, Landmark, QrCode, ShieldCheck, Wallet, X } from "lucide-react";
@@ -172,10 +173,12 @@ export default function SubscribePage() {
 
     setSubmitting(true);
     try {
+      // Large phone screenshots are shrunk so they fit the hosted upload limit.
+      const receiptFile = await shrinkImage(receipt).catch(() => receipt);
       const uploadResponse = await fetch("/api/payments/upload-receipt", {
         method: "POST",
-        headers: { "Content-Type": receipt.type },
-        body: receipt,
+        headers: { "Content-Type": receiptFile.type },
+        body: receiptFile,
       });
       const uploadData = await readJson(uploadResponse, "The receipt upload failed. Please try again.");
       if (!uploadResponse.ok) throw new Error(uploadData.error || "Could not upload the receipt.");

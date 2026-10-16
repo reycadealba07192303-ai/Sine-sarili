@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { uploadMedia } from "@/lib/media-upload";
 
 type Person = {
   _id: string;
@@ -86,12 +87,10 @@ export function AdminPeopleManager({ notify, confirm, onCountChange }: Props) {
     if (file.size > 20 * 1024 * 1024) { notify("Images must be 20 MB or smaller", "error"); return; }
     setUploading(true);
     try {
-      const response = await fetch("/api/admin/uploads/photo", { method: "POST", headers: { "Content-Type": file.type }, body: file });
-      if (!response.ok) { notify(await errorFrom(response, "Could not upload the photo"), "error"); return; }
-      const url = ((await response.json()) as { data: { url: string } }).data.url;
+      const url = await uploadMedia("photo", file);
       setDraft((current) => (current ? { ...current, photoUrl: url } : current));
-    } catch {
-      notify("Could not upload the photo", "error");
+    } catch (error) {
+      notify(error instanceof Error && error.message ? error.message : "Could not upload the photo", "error");
     } finally {
       setUploading(false);
     }

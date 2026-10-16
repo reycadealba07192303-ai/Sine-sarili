@@ -20,8 +20,10 @@ import { ViewerAccount } from "../models/viewer-account.js";
 import { BankAccount } from "../models/bank-account.js";
 import { PaymentSubmission } from "../models/payment-submission.js";
 import { connectDatabase } from "../db.js";
-import { ensureUploadsDirectory, uploadsDirectory } from "../uploads.js";
-import { localDrmUrl } from "../services/drm.js";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { IMAGE_MAX_BYTES, IMAGE_TYPES, VIDEO_MAX_BYTES, VIDEO_TYPES, accessFor, blobStorageEnabled, isPrivateBlobUrl, isUploadKind, isVideoKind, openPrivateBlob, saveUpload, storageMode, tokenFor, type UploadKind } from "../services/storage.js";
+import { drmKeyIdFromUrl, localDrmUrl } from "../services/drm.js";
+import { requestEncryption } from "../services/encryption-dispatch.js";
 import { getPlans, PlanValidationError, savePlans } from "../services/plans.js";
 import {
   clearSessionCookie,
@@ -45,7 +47,7 @@ function playableSource(rawUrl: unknown, rawProvider: unknown, rawAssetId: unkno
   const url = cleanText(rawUrl, 2048);
   const provider = VIDEO_PROVIDERS.includes(String(rawProvider)) ? String(rawProvider) : "direct";
   const assetId = cleanText(rawAssetId, 256);
-  if (localDrmUrl(url)) return { url, provider: "drm", assetId: assetId || url.split("/")[3] };
+  if (localDrmUrl(url)) return { url, provider: "drm", assetId: assetId || drmKeyIdFromUrl(url) };
   if (provider === "drm" && UUID.test(assetId) && /^https:\/\/.+\.mpd(\?.*)?$/i.test(url)) return { url, provider, assetId };
   if (provider !== "drm") return { url, provider, assetId: "" };
   const detected = /youtube\.com|youtu\.be/i.test(url) ? "youtube" : /vimeo\.com/i.test(url) ? "vimeo" : /\.m3u8(\?|$)/i.test(url) ? "hls" : "direct";
@@ -245,21 +247,26 @@ adminRouter.get("/dashboard-stats", requireAdmin, async (_request, response, nex
 // 3. Media Upload Layer
 // ==========================================
 
+adminRouter.get("/storage", requireAdmin, (_request, response) => {
+  response.json({ data: { mode: storageMode() } });
+});
+
+// Local development: files stream through the API to apps/api/uploads.
 adminRouter.post("/uploads/:kind", requireAdmin, async (request, response, next) => {
   const kind = String(request.params.kind ?? "");
-  const imageTypes: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
-  const videoTypes: Record<string, string> = { "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov" };
   const isImage = kind === "poster" || kind === "backdrop" || kind === "photo" || kind === "qrcode";
-  const allowedTypes = isImage ? imageTypes : ["teaser", "film"].includes(kind) ? videoTypes : null;
+  const allowedTypes = isImage ? IMAGE_TYPES : isVideoKind(kind) ? VIDEO_TYPES : null;
 
-  if (!allowedTypes) {
+  if (!allowedTypes || !isUploadKind(kind)) {
     response.status(400).json({ error: "Choose a poster, backdrop, photo, qrcode, teaser, or film upload" });
     return;
   }
 
   const contentType = request.get("content-type")?.split(";")[0].trim().toLowerCase() ?? "";
   const extension = allowedTypes[contentType];
-  const maxBytes = isImage ? 20 * 1024 * 1024 : 2 * 1024 * 1024 * 1024;
+  // On Vercel, large files go straight from the browser to Blob (see /blob-upload); this path is capped.
+  const maxBytes = blobStorageEnabled() ? 4 * 1024 * 1024 : isImage ? IMAGE_MAX_BYTES : 2 * 1024 * 1024 * 1024;
+  const tooLarge = blobStorageEnabled() ? "Files over 4 MB must be uploaded directly. Refresh the page and try again." : isImage ? "Images must be 20 MB or smaller" : "Videos must be 2 GB or smaller";
   const declaredBytes = Number(request.get("content-length") ?? 0);
 
   if (!extension) {
@@ -267,32 +274,63 @@ adminRouter.post("/uploads/:kind", requireAdmin, async (request, response, next)
     return;
   }
   if (declaredBytes > maxBytes) {
-    response.status(413).json({ error: isImage ? "Images must be 20 MB or smaller" : "Videos must be 2 GB or smaller" });
+    response.status(413).json({ error: tooLarge });
     return;
   }
 
-  const filename = `${randomUUID()}.${extension}`;
-  const destination = `${uploadsDirectory}/${filename}`;
-  let receivedBytes = 0;
-  const sizeGuard = new Transform({
-    transform(chunk: Buffer, _encoding, callback) {
-      receivedBytes += chunk.length;
-      callback(receivedBytes > maxBytes ? Object.assign(new Error("Upload is too large"), { status: 413 }) : null, chunk);
-    },
-  });
-
   try {
-    await ensureUploadsDirectory();
-    await pipeline(request, sizeGuard, createWriteStream(destination, { flags: "wx" }));
-    response.status(201).json({ data: { url: `/uploads/${filename}`, size: receivedBytes } });
+    const saved = await saveUpload(kind, `${randomUUID()}.${extension}`, request, contentType, maxBytes);
+    response.status(201).json({ data: saved });
   } catch (error) {
-    await unlink(destination).catch(() => undefined);
     if (error && typeof error === "object" && "status" in error && error.status === 413) {
-      response.status(413).json({ error: isImage ? "Images must be 20 MB or smaller" : "Videos must be 2 GB or smaller" });
+      response.status(413).json({ error: tooLarge });
       return;
     }
     next(error);
   }
+});
+
+// On Vercel: the browser uploads straight to Vercel Blob with a short-lived token issued here.
+adminRouter.post("/blob-upload", requireAdmin, async (request, response, next) => {
+  try {
+    if (!blobStorageEnabled()) { response.status(400).json({ error: "Direct uploads are not configured" }); return; }
+    const body = request.body as HandleUploadBody;
+    let kind: UploadKind = "poster";
+    try { kind = JSON.parse(String((body as { payload?: { clientPayload?: string } }).payload?.clientPayload ?? "{}")).kind; } catch { /* validated below */ }
+    if (!isUploadKind(kind) || kind === "receipt") { response.status(400).json({ error: "Unknown upload type" }); return; }
+    const access = accessFor(kind);
+    const result = await handleUpload({
+      body,
+      request,
+      token: tokenFor(access),
+      onBeforeGenerateToken: async (pathname) => {
+        if (!pathname.startsWith(`${kind}s/`)) throw new Error("Unexpected upload path");
+        return {
+          allowedContentTypes: Object.keys(isVideoKind(kind) ? VIDEO_TYPES : IMAGE_TYPES),
+          maximumSizeInBytes: isVideoKind(kind) ? VIDEO_MAX_BYTES : IMAGE_MAX_BYTES,
+          addRandomSuffix: true,
+        };
+      },
+    });
+    response.json(result);
+  } catch (error) {
+    if (error instanceof Error && /path|type|size|token/i.test(error.message)) { response.status(400).json({ error: error.message }); return; }
+    next(error);
+  }
+});
+
+// Receipts live in the private store; admins view them through this route.
+adminRouter.get("/receipt-image", requirePermission("analytics"), async (request, response, next) => {
+  try {
+    const url = typeof request.query.url === "string" ? request.query.url : "";
+    if (!isPrivateBlobUrl(url) || !url.includes("/receipts/")) { response.status(404).end(); return; }
+    const file = await openPrivateBlob(url);
+    if (!file) { response.status(404).end(); return; }
+    response.setHeader("Content-Type", file.contentType);
+    response.setHeader("Cache-Control", "private, no-store");
+    response.setHeader("X-Content-Type-Options", "nosniff");
+    file.stream.pipe(response);
+  } catch (error) { next(error); }
 });
 
 // ==========================================
@@ -399,6 +437,7 @@ adminRouter.post("/films", requirePermission("films"), async (request, response,
       status: "draft",
     });
 
+    requestEncryption();
     await recordActivity(request, "film.create", "film", String(film._id), {
       title: film.title,
       slug: film.slug,
@@ -468,6 +507,7 @@ adminRouter.patch("/films/:id", requirePermission("films"), async (request, resp
       return;
     }
 
+    requestEncryption();
     await recordActivity(request, "film.update", "film", String(film._id), {
       title: film.title,
       updatedFields: Object.keys(updates),

@@ -1,5 +1,6 @@
 "use client";
 
+import { isStoredVideo } from "@/lib/media-upload";
 import { useState } from "react";
 
 type VideoProvider = "direct" | "youtube" | "vimeo" | "hls" | "embed" | "external" | "drm";
@@ -124,7 +125,7 @@ export function AdminSeriesEditor({ seasons, onChange, onUploadVideo }: {
                 <label>Thumbnail URL<input value={episode.thumbnailUrl} placeholder="https://… (optional)" onChange={event => updateEpisode(season.key, episode.key, { thumbnailUrl: event.target.value })} /></label>
                 <label>Video URL<input value={episode.videoUrl} placeholder="Upload a file or paste a stream link" onChange={event => updateEpisode(season.key, episode.key, { videoUrl: event.target.value, ...(episode.videoProvider === "drm" ? { videoProvider: "direct" as VideoProvider } : {}) })} /></label>
                 <label>Video provider<select value={episode.videoProvider} onChange={event => updateEpisode(season.key, episode.key, { videoProvider: event.target.value as VideoProvider })}>{PROVIDERS.filter(provider => provider !== "drm" || episode.videoProvider === "drm").map(provider => <option key={provider} value={provider}>{provider === "drm" ? "protected (automatic)" : provider}</option>)}</select></label>
-                {episode.videoProvider === "drm" ? <p className="span-2 studio-protect-note is-on">Protected. This episode was encrypted automatically.</p> : episode.videoUrl.startsWith("/uploads/") ? <p className="span-2 studio-protect-note">This uploaded episode will be encrypted automatically about a minute after you save.</p> : null}
+                {episode.videoProvider === "drm" ? <p className="span-2 studio-protect-note is-on">Protected. This episode was encrypted automatically.</p> : isStoredVideo(episode.videoUrl) ? <p className="span-2 studio-protect-note">This uploaded episode will be encrypted automatically about a minute after you save.</p> : null}
                 <label>Upload episode video<input type="file" accept="video/mp4,video/webm,video/quicktime" disabled={uploadingKey !== null} onChange={event => upload(season.key, episode.key, event.target.files?.[0])} />{uploadingKey === episode.key && <small>Uploading…</small>}</label>
                 <label>Subtitles URL (.vtt)<input value={episode.subtitlesUrl} placeholder="Optional" onChange={event => updateEpisode(season.key, episode.key, { subtitlesUrl: event.target.value })} /></label>
               </div>

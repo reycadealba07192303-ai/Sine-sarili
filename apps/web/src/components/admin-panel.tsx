@@ -7,6 +7,7 @@ import { AdminActivityLog } from "@/components/admin-activity-log";
 import { AdminAwardsManager } from "@/components/admin-awards-manager";
 import { AdminPeopleManager } from "@/components/admin-people-manager";
 import { AdminInviteDialog } from "@/components/admin-invite-dialog";
+import { isEncryptedStream, isStoredVideo, receiptImageSrc, uploadMedia } from "@/lib/media-upload";
 import { AdminPlansEditor } from "@/components/admin-plans-editor";
 import { AdminSeriesEditor, seasonDraftsFromApi, seasonDraftsToPayload, type SeasonDraft } from "@/components/admin-series-editor";
 
@@ -422,6 +423,7 @@ export function AdminPanel() {
   const [videoSourceMode, setVideoSourceMode] = useState<"upload" | "embed">("embed");
   const [teaserSourceMode, setTeaserSourceMode] = useState<"upload" | "embed">("embed");
   const [uploadingKind, setUploadingKind] = useState<string | null>(null);
+  const [uploadPercent, setUploadPercent] = useState(0);
   const [seasonDrafts, setSeasonDrafts] = useState<SeasonDraft[]>([]);
   const [filmForm, setFilmForm] = useState({
     contentType: "film" as "film" | "series",
@@ -590,25 +592,18 @@ export function AdminPanel() {
   const handleUploadFile = async (kind: "poster" | "backdrop" | "teaser" | "film" | "qrcode", file: File) => {
     setBusy(true);
     setUploadingKind(kind);
+    setUploadPercent(0);
     try {
-      const res = await fetch(`/api/admin/uploads/${kind}`, {
-        method: "POST",
-        headers: { "Content-Type": file.type || (kind === "film" || kind === "teaser" ? "video/mp4" : "image/jpeg") },
-        body: file,
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        notify(data.error || "Upload failed", "error");
-        return null;
-      }
-      notify(`Uploaded ${kind} asset successfully!`, "success");
-      return data.data.url as string;
-    } catch {
-      notify("Network error during upload", "error");
+      const url = await uploadMedia(kind, file, setUploadPercent);
+      notify(kind === "film" ? "Film uploaded. It will be encrypted automatically after you save." : `Uploaded ${kind} successfully`, "success");
+      return url;
+    } catch (error) {
+      notify(error instanceof Error && error.message ? error.message : "Upload failed. Please try again.", "error");
       return null;
     } finally {
       setBusy(false);
       setUploadingKind(null);
+      setUploadPercent(0);
     }
   };
 
@@ -1649,8 +1644,8 @@ export function AdminPanel() {
                                       isFeatured: Boolean(film.isFeatured),
                                       audienceScore: film.audienceScore?.toString() ?? "",
                                     });
-                                    setVideoSourceMode(film.videoUrl?.startsWith("/uploads/") ? "upload" : "embed");
-                                    setTeaserSourceMode(film.teaserUrl?.startsWith("/uploads/") ? "upload" : "embed");
+                                    setVideoSourceMode(isStoredVideo(film.videoUrl ?? "") || isEncryptedStream(film.videoUrl ?? "") ? "upload" : "embed");
+                                    setTeaserSourceMode(isStoredVideo(film.teaserUrl ?? "") || isEncryptedStream(film.teaserUrl ?? "") ? "upload" : "embed");
                                     setFilmEditorOpen(true);
                                   }}
                                 >
@@ -3264,7 +3259,7 @@ export function AdminPanel() {
 
                   {videoSourceMode === "upload" ? (
                     <div>
-                      {filmForm.videoUrl && (filmForm.videoUrl.startsWith("/uploads/") || filmForm.videoProvider === "direct") ? (
+                      {filmForm.videoUrl && (isStoredVideo(filmForm.videoUrl) || isEncryptedStream(filmForm.videoUrl) || filmForm.videoProvider === "direct") ? (
                         <div style={{ display: "grid", gap: "12px" }}>
                           <div className="studio-media-loaded">
                             <div className="studio-media-loaded-info">
@@ -3301,7 +3296,7 @@ export function AdminPanel() {
                               </button>
                             </div>
                           </div>
-                          {filmForm.videoUrl.startsWith("/uploads/drm/") ? (
+                          {isEncryptedStream(filmForm.videoUrl) ? (
                             <p className="studio-protect-note is-on">Protected and encrypted. Open the film page as a viewer to watch it.</p>
                           ) : <video
                             src={filmForm.videoUrl}
@@ -3331,7 +3326,7 @@ export function AdminPanel() {
                               <AdminIcon name="film" />
                             </div>
                             <div className="studio-upload-bar-text">
-                              <strong>{uploadingKind === "film" ? "Uploading Film Master… Please wait…" : "Click to Select Film Video File"}</strong>
+                              <strong>{uploadingKind === "film" ? `Uploading film master… ${uploadPercent}%` : "Click to Select Film Video File"}</strong>
                               <small>Supports MP4, WebM, QuickTime MOV up to 2 GB for streaming playback</small>
                             </div>
                           </div>
@@ -3352,7 +3347,7 @@ export function AdminPanel() {
                             const val = e.target.value;
                             // Pick the provider from the link; "drm" is only ever set by the automatic encryption.
                             let provider = filmForm.videoProvider === "drm" ? "direct" : filmForm.videoProvider;
-                            if (/^\/uploads\/drm\//.test(val)) provider = "drm";
+                            if (isEncryptedStream(val)) provider = "drm";
                             else if (val.includes("youtube.com") || val.includes("youtu.be")) provider = "youtube";
                             else if (val.includes("vimeo.com")) provider = "vimeo";
                             else if (/\.m3u8(\?|$)/i.test(val)) provider = "hls";
@@ -3382,7 +3377,7 @@ export function AdminPanel() {
 
                 {filmForm.videoProvider === "drm" ? (
                   <p className="span-2 studio-protect-note is-on">Protected. This video was encrypted automatically and can only be played by signed-in CinePass viewers.</p>
-                ) : filmForm.videoUrl.startsWith("/uploads/") ? (
+                ) : isStoredVideo(filmForm.videoUrl) ? (
                   <p className="span-2 studio-protect-note">This uploaded video will be encrypted automatically about a minute after you save.</p>
                 ) : null}
 
@@ -3413,7 +3408,7 @@ export function AdminPanel() {
 
                   {teaserSourceMode === "upload" ? (
                     <div>
-                      {filmForm.teaserUrl && (filmForm.teaserUrl.startsWith("/uploads/") || filmForm.teaserProvider === "direct") ? (
+                      {filmForm.teaserUrl && (isStoredVideo(filmForm.teaserUrl) || isEncryptedStream(filmForm.teaserUrl) || filmForm.teaserProvider === "direct") ? (
                         <div style={{ display: "grid", gap: "12px" }}>
                           <div className="studio-media-loaded">
                             <div className="studio-media-loaded-info">
@@ -3448,7 +3443,7 @@ export function AdminPanel() {
                               </button>
                             </div>
                           </div>
-                          {filmForm.teaserUrl.startsWith("/uploads/drm/") ? (
+                          {isEncryptedStream(filmForm.teaserUrl) ? (
                             <p className="studio-protect-note is-on">Protected and encrypted. Open the film page as a viewer to watch it.</p>
                           ) : <video
                             src={filmForm.teaserUrl}
@@ -3476,7 +3471,7 @@ export function AdminPanel() {
                               <AdminIcon name="film" />
                             </div>
                             <div className="studio-upload-bar-text">
-                              <strong>{uploadingKind === "teaser" ? "Uploading Teaser… Please wait…" : "Click to Select Teaser / Trailer File"}</strong>
+                              <strong>{uploadingKind === "teaser" ? `Uploading teaser… ${uploadPercent}%` : "Click to Select Teaser / Trailer File"}</strong>
                               <small>Supports MP4, WebM up to 500 MB for instant streaming preview</small>
                             </div>
                           </div>
@@ -3533,7 +3528,7 @@ export function AdminPanel() {
                         </div>
                         <div className={`studio-art-preview${value ? " has-image" : ""}`}>
                           {value ? <img src={value} alt={`${art.label} preview`} /> : <span>No {art.label.toLowerCase()} yet</span>}
-                          {uploadingKind === art.kind && <span className="studio-art-busy">Uploading…</span>}
+                          {uploadingKind === art.kind && <span className="studio-art-busy">Uploading… {uploadPercent}%</span>}
                         </div>
                         <div className="studio-art-actions">
                           <label className="studio-art-upload">
@@ -3923,7 +3918,7 @@ export function AdminPanel() {
                     }}
                   >
                     <img
-                      src={inspectingReceipt.receiptUrl}
+                      src={receiptImageSrc(inspectingReceipt.receiptUrl)}
                       alt="Payment Receipt"
                       onError={() => setReceiptImgError(true)}
                       style={{
@@ -3935,7 +3930,7 @@ export function AdminPanel() {
                       }}
                     />
                     <a
-                      href={inspectingReceipt.receiptUrl}
+                      href={receiptImageSrc(inspectingReceipt.receiptUrl)}
                       target="_blank"
                       rel="noreferrer"
                       style={{

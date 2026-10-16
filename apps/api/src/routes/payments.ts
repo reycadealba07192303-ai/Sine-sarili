@@ -13,7 +13,7 @@ import { Subscription } from "../models/subscription.js";
 import { ViewerAccount } from "../models/viewer-account.js";
 import { verifyPaymentReceipt } from "../services/receipt-verifier.js";
 import { durationFor, getPlans } from "../services/plans.js";
-import { ensureUploadsDirectory, uploadsDirectory } from "../uploads.js";
+import { IMAGE_TYPES, blobStorageEnabled, saveUpload } from "../services/storage.js";
 
 import { activationHash, emailSubscriptionActivation } from "../services/subscription-activation.js";
 
@@ -65,15 +65,11 @@ paymentsRouter.get("/plans", async (_request, response, next) => {
 // 2. Receipt Upload (Public Viewer)
 // ==========================================
 paymentsRouter.post("/upload-receipt", async (request, response, next) => {
-  const imageTypes: Record<string, string> = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
-  };
-
   const contentType = request.get("content-type")?.split(";")[0].trim().toLowerCase() ?? "";
-  const extension = imageTypes[contentType];
-  const maxBytes = 15 * 1024 * 1024; // 15 MB
+  const extension = IMAGE_TYPES[contentType];
+  // Vercel Functions accept request bodies up to 4.5 MB, so the hosted limit is lower.
+  const maxBytes = blobStorageEnabled() ? 4 * 1024 * 1024 : 15 * 1024 * 1024;
+  const limitText = blobStorageEnabled() ? "4 MB" : "15 MB";
   const declaredBytes = Number(request.get("content-length") ?? 0);
 
   if (!extension) {
@@ -81,32 +77,18 @@ paymentsRouter.post("/upload-receipt", async (request, response, next) => {
     return;
   }
   if (declaredBytes > maxBytes) {
-    response.status(413).json({ error: "Receipt image must be 15 MB or smaller" });
+    response.status(413).json({ error: `Receipt image must be ${limitText} or smaller` });
     return;
   }
 
-  const filename = `receipt-${randomUUID()}.${extension}`;
-  const destination = `${uploadsDirectory}/${filename}`;
-  let receivedBytes = 0;
-  const sizeGuard = new Transform({
-    transform(chunk: Buffer, _encoding, callback) {
-      receivedBytes += chunk.length;
-      callback(receivedBytes > maxBytes ? Object.assign(new Error("Upload is too large"), { status: 413 }) : null, chunk);
-    },
-  });
-
   try {
-    await ensureUploadsDirectory();
-    await pipeline(request, sizeGuard, createWriteStream(destination, { flags: "wx" }));
-    response.status(201).json({
-      data: {
-        url: `/uploads/${filename}`,
-        size: receivedBytes,
-        mimeType: contentType,
-      },
-    });
+    const saved = await saveUpload("receipt", `receipt-${randomUUID()}.${extension}`, request, contentType, maxBytes);
+    response.status(201).json({ data: { url: saved.url, size: saved.size, mimeType: contentType } });
   } catch (error) {
-    await unlink(destination).catch(() => undefined);
+    if (error && typeof error === "object" && "status" in error && error.status === 413) {
+      response.status(413).json({ error: `Receipt image must be ${limitText} or smaller` });
+      return;
+    }
     next(error);
   }
 });

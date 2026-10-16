@@ -15,6 +15,7 @@ import { Film } from "./models/film.js";
 import { hasFilmAccess } from "./auth.js";
 import { connectDatabase } from "./db.js";
 import { adminInvitePublicRouter, adminInvitesRouter } from "./routes/admin-invites.js";
+import { internalDrmRouter } from "./routes/internal-drm.js";
 import { protectUploadedVideos } from "./services/auto-drm.js";
 
 const app = express();
@@ -73,6 +74,7 @@ app.use("/api/directors", directorsRouter);
 app.use("/api/awards", awardsRouter);
 app.use("/api/account", accountRouter);
 app.use("/api/payments", paymentsRouter);
+app.use("/api/internal/drm", internalDrmRouter);
 app.use("/api/admin-invite", adminInvitePublicRouter);
 app.use("/api/admin", adminInvitesRouter);
 app.use("/api/admin", adminRouter);
