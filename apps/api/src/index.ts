@@ -1,7 +1,8 @@
 import { playbackRouter } from "./routes/playback.js";
 import cors from "cors";
 import express from "express";
-import helmet from "helmet";
+import * as helmetModule from "helmet";
+import type { HelmetOptions } from "helmet";
 import { adminRouter } from "./routes/admin.js";
 import { accountRouter } from "./routes/account.js";
 import { filmsRouter } from "./routes/films.js";
@@ -17,6 +18,15 @@ import { connectDatabase } from "./db.js";
 import { adminInvitePublicRouter, adminInvitesRouter } from "./routes/admin-invites.js";
 import { internalDrmRouter } from "./routes/internal-drm.js";
 import { protectUploadedVideos } from "./services/auto-drm.js";
+
+// helmet ships CommonJS types, so depending on the compiler's module mode (Vercel's builder differs
+// from local tsx) its default import is either the function itself or a namespace wrapping it.
+type HelmetMiddleware = (options?: HelmetOptions) => express.RequestHandler;
+function resolveHelmet(value: unknown): HelmetMiddleware {
+  if (typeof value === "function") return value as HelmetMiddleware;
+  return resolveHelmet((value as { default?: unknown }).default);
+}
+const helmet = resolveHelmet(helmetModule);
 
 const app = express();
 const allowedOrigins = (process.env.WEB_ORIGIN ?? "http://localhost:3000")
